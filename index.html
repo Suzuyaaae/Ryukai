@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff FA | Taux d'implication</title>
+    <!-- Inclure Tailwind CSS pour le style -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+            padding-right: 2rem;
+            cursor: pointer;
+        }
+        .profile-link {
+            transition: color 0.2s ease-in-out;
+        }
+        .profile-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        /* Style pour les couleurs des lignes */
+        .color-excellent { background-color: #d1fae5; }
+        .color-bon { background-color: #e0e7ff; }
+        .color-moyen { background-color: #fef3c7; }
+        .color-faible { background-color: #fee2e2; }
+        .color-absent { background-color: #f3f4f6; }
+        .color-inactif { background-color: #e5e7eb; }
+        .color-nouveau { background-color: #f3e8ff; }
+        /* Style pour l'animation de dépliage */
+        #add-staff-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        #add-staff-container.open {
+            max-height: 500px; /* Une valeur assez grande pour contenir le formulaire */
+            transition: max-height 0.5s ease-in;
+        }
+        .rotate-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .rotate-icon.rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded-xl shadow-2xl p-4 sm:p-8 max-w-6xl w-full mx-auto my-8 border border-gray-200">
+        <!-- En-tête avec logo et titre -->
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-6">
+            <div class="flex items-center mb-4 sm:mb-0">
+                <img src="rykai.jpg" onerror="this.onerror=null;this.src='https://placehold.co/80x80/2563eb/ffffff?text=Ryukai'" alt="Logo Ryukai" class="w-16 h-16 sm:w-20 sm:h-20 mr-4 rounded-full shadow-md">
+                <div class="text-center sm:text-left">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Staff FA | Taux d'implication</h1>
+                    <p class="text-gray-500 text-sm sm:text-base">A remplir avant mercredi 20h</p>
+                </div>
+            </div>
+            <!-- Section pour la dernière mise à jour -->
+            <div class="text-right mt-4 sm:mt-0">
+                <label for="last-update" class="text-gray-600 text-sm font-semibold block">Dernière mise à jour :</label>
+                <input type="date" id="last-update" class="mt-1 block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1.5" value="2025-08-27">
+            </div>
+        </div>
+        
+        <!-- Tableau des données -->
+        <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm mb-6">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Poste</th>
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Discord</th>
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Implication IG</th>
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Panel</th>
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Ticket Panel</th>
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="staff-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Les lignes du tableau seront générées ici par le JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bouton pour afficher/cacher le formulaire -->
+        <div class="text-center">
+            <button id="toggle-form-btn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                <span class="mr-2">Ajouter un nouveau membre</span>
+                <svg id="toggle-icon" class="h-5 w-5 rotate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Conteneur du formulaire qui sera replié/déplié -->
+        <div id="add-staff-container" class="mt-6">
+            <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                <form id="add-staff-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label for="new-poste" class="block text-sm font-medium text-gray-700">Poste</label>
+                        <select id="new-poste" name="poste" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                            <option value="Administrateur">Administrateur</option>
+                            <option value="Modérateur Expert">Modérateur Expert</option>
+                            <option value="Modérateur" selected>Modérateur</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="new-discord" class="block text-sm font-medium text-gray-700">Nom Discord</label>
+                        <input type="text" id="new-discord" name="discord" required placeholder="Nom - ID Discord" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                    </div>
+                    <div>
+                        <label for="new-implication-ig" class="block text-sm font-medium text-gray-700">Implication IG</label>
+                        <select id="new-implication-ig" name="implication_ig" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                            <option value="Excellent">Excellent</option>
+                            <option value="Bon">Bon</option>
+                            <option value="Moyen">Moyen</option>
+                            <option value="Faible">Faible</option>
+                            <option value="Absent">Absent</option>
+                            <option value="Inactif">Inactif</option>
+                            <option value="Nouveau" selected>Nouveau</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="new-panel-url" class="block text-sm font-medium text-gray-700">Lien Panel</label>
+                        <input type="url" id="new-panel-url" name="panel_url" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                    </div>
+                    <div>
+                        <label for="new-ticket-panel" class="block text-sm font-medium text-gray-700">Ticket Panel</label>
+                        <select id="new-ticket-panel" name="ticket_panel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                            <option value="">(Vide)</option>
+                            <option value="Bon">Bon</option>
+                            <option value="Moyen">Moyen</option>
+                            <option value="Faible">Faible</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 lg:col-span-3 flex items-end">
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            Ajouter le membre
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let staffData = [
+                // Données initiales pour éviter un tableau vide au démarrage
+                { poste: "Administrateur", discord: "Sancho - 343744257523449856", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199003703577", ticket_panel: "Bon" },
+                { poste: "Administrateur", discord: "Kota Vandel - 837815169546584076", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197978769095", ticket_panel: "Moyen" },
+                { poste: "Modérateur Expert", discord: "Garoh - 611267447634395197", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198984315574", ticket_panel: "" },
+                { poste: "Modérateur Expert", discord: "Yuta - 577111679784189952", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198930092559", ticket_panel: "" },
+                { poste: "Modérateur Expert", discord: "Kintamo - 740200999221854280", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198965874283", ticket_panel: "" },
+                { poste: "Modérateur Expert", discord: "Yukai - 76561198257207372", implication_ig: "Bon", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198257207372", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Haakio - 398127648041205761", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197970892301", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Zenkai - 1176773441689497670", implication_ig: "Faible", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199570427503", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Jiinnn - 544228743992967198", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199083258134", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Aurelius - 320452860355543041", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198040241858", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Yli6s - 362297463891296267", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199400544206", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Amine - 736693072230614603", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199343058863", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Antho - 560451420315199279", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199027538864", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Kaizuro - 1009963891692413150", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199204985011", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Prat - 101047478060613140", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199496883813", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Jombo - 541002960616482846", implication_ig: "Inactif", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198351870401", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Rogue - 735572396500418570", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199013247705", ticket_panel: "" },
+                { poste: "Modérateur", discord: "Vlade - 321061482173431808", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/7656119810916321", ticket_panel: "" }
+            ];
+
+            const tableBody = document.getElementById('staff-table-body');
+            const addForm = document.getElementById('add-staff-form');
+            const toggleBtn = document.getElementById('toggle-form-btn');
+            const formContainer = document.getElementById('add-staff-container');
+            const toggleIcon = document.getElementById('toggle-icon');
+            
+            // Ordre de priorité des postes pour le tri
+            const posteOrder = ['Administrateur', 'Modérateur Expert', 'Modérateur'];
+
+            // Fonction pour trier les données
+            function sortStaffData(data) {
+                return data.sort((a, b) => {
+                    const orderA = posteOrder.indexOf(a.poste);
+                    const orderB = posteOrder.indexOf(b.poste);
+                    return orderA - orderB;
+                });
+            }
+
+            // Fonction pour rendre le tableau
+            function renderTable() {
+                // Trier les données avant de les rendre
+                const sortedData = sortStaffData(staffData);
+                tableBody.innerHTML = ''; // Nettoyer le tableau avant de le remplir
+                sortedData.forEach((member, index) => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 transition-colors';
+
+                    // Créer la cellule pour le poste
+                    const posteCell = document.createElement('td');
+                    posteCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6';
+                    const posteSelect = document.createElement('select');
+                    posteSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
+                    ['Administrateur', 'Modérateur Expert', 'Modérateur'].forEach(optionValue => {
+                        const option = document.createElement('option');
+                        option.value = optionValue;
+                        option.textContent = optionValue;
+                        if (optionValue === member.poste) {
+                            option.selected = true;
+                        }
+                        posteSelect.appendChild(option);
+                    });
+                    // Écouter le changement de poste pour mettre à jour et trier
+                    posteSelect.addEventListener('change', (e) => {
+                        member.poste = e.target.value;
+                        renderTable(); // Re-render le tableau pour trier
+                    });
+                    posteCell.appendChild(posteSelect);
+
+                    // Créer la cellule pour le nom Discord
+                    const discordCell = document.createElement('td');
+                    discordCell.className = 'px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 md:px-6';
+                    discordCell.textContent = member.discord;
+
+                    // Créer la cellule pour l'implication IG
+                    const igCell = document.createElement('td');
+                    igCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
+                    const igSelect = document.createElement('select');
+                    igSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
+                    const igOptions = ['Excellent', 'Bon', 'Moyen', 'Faible', 'Absent', 'Inactif', 'Nouveau'];
+                    igOptions.forEach(optionValue => {
+                        const option = document.createElement('option');
+                        option.value = optionValue;
+                        option.textContent = optionValue;
+                        if (optionValue === member.implication_ig) {
+                            option.selected = true;
+                        }
+                        option.className = `bg-${getColorClass(optionValue)}-100`;
+                        igSelect.appendChild(option);
+                    });
+                    igCell.appendChild(igSelect);
+                    
+                    // Créer la cellule pour le panel
+                    const panelCell = document.createElement('td');
+                    panelCell.className = 'px-3 py-4 whitespace-nowrap text-sm md:px-6';
+                    if (member.panel_url) {
+                        const panelLink = document.createElement('a');
+                        panelLink.href = member.panel_url;
+                        panelLink.target = '_blank';
+                        panelLink.rel = 'noopener noreferrer';
+                        panelLink.className = 'text-blue-600 hover:text-blue-800 profile-link';
+                        panelLink.textContent = 'Lien';
+                        panelCell.appendChild(panelLink);
+                    }
+
+                    // Créer la cellule pour le ticket panel
+                    const ticketCell = document.createElement('td');
+                    ticketCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
+                    const ticketSelect = document.createElement('select');
+                    ticketSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
+                    const ticketOptions = ['', 'Bon', 'Moyen', 'Faible'];
+                    ticketOptions.forEach(optionValue => {
+                        const option = document.createElement('option');
+                        option.value = optionValue;
+                        option.textContent = optionValue || '(Vide)';
+                        if (optionValue === member.ticket_panel) {
+                            option.selected = true;
+                        }
+                        option.className = `bg-${getColorClass(optionValue)}-100`;
+                        ticketSelect.appendChild(option);
+                    });
+                    ticketCell.appendChild(ticketSelect);
+
+                    // Créer la cellule pour la suppression
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 hover:text-red-700 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                        </svg>
+                    `;
+                    deleteBtn.title = `Supprimer ${member.discord}`;
+                    deleteBtn.onclick = () => handleDelete(index);
+                    actionCell.appendChild(deleteBtn);
+
+                    // Ajouter toutes les cellules à la ligne
+                    row.appendChild(posteCell);
+                    row.appendChild(discordCell);
+                    row.appendChild(igCell);
+                    row.appendChild(panelCell);
+                    row.appendChild(ticketCell);
+                    row.appendChild(actionCell);
+
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // Fonction pour récupérer la classe de couleur Tailwind en fonction du statut
+            function getColorClass(status) {
+                switch (status) {
+                    case 'Excellent': return 'green';
+                    case 'Bon': return 'blue';
+                    case 'Moyen': return 'yellow';
+                    case 'Faible': return 'red';
+                    case 'Absent': return 'gray';
+                    case 'Inactif': return 'gray';
+                    case 'Nouveau': return 'purple';
+                    default: return 'gray';
+                }
+            }
+
+            // Fonction de gestion de l'ajout
+            addForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newMember = {
+                    poste: e.target.poste.value,
+                    discord: e.target.discord.value,
+                    implication_ig: e.target.implication_ig.value,
+                    panel_url: e.target.panel_url.value,
+                    ticket_panel: e.target.ticket_panel.value
+                };
+                staffData.push(newMember);
+                renderTable(); // Re-render pour trier le nouveau membre
+                addForm.reset();
+            });
+
+            // Fonction de gestion de la suppression
+            function handleDelete(index) {
+                // Trouver l'élément à supprimer dans le tableau non trié
+                const memberToDelete = sortStaffData(staffData)[index];
+                const originalIndex = staffData.findIndex(member => member === memberToDelete);
+
+                if (originalIndex !== -1) {
+                    staffData.splice(originalIndex, 1);
+                    renderTable(); // Re-render le tableau après suppression
+                }
+            }
+
+            // Gérer l'affichage du formulaire au clic du bouton
+            toggleBtn.addEventListener('click', () => {
+                formContainer.classList.toggle('open');
+                toggleIcon.classList.toggle('rotate-180');
+            });
+
+            // Rendre le tableau au chargement de la page
+            renderTable();
+        });
+    </script>
+
+</body>
+</html>
