@@ -54,6 +54,30 @@
         .rotate-icon.rotate-180 {
             transform: rotate(180deg);
         }
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            padding: 8px;
+            border-radius: 8px;
+            top: 100%; /* Positionne le menu en dessous du nom */
+            left: 0;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .dropdown-content.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
@@ -116,8 +140,12 @@
                         </select>
                     </div>
                     <div>
-                        <label for="new-discord" class="block text-sm font-medium text-gray-700">Nom Discord</label>
-                        <input type="text" id="new-discord" name="discord" required placeholder="Nom - ID Discord" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                        <label for="new-discord-name" class="block text-sm font-medium text-gray-700">Nom Discord</label>
+                        <input type="text" id="new-discord-name" name="discord_name" required placeholder="Nom Discord" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
+                    </div>
+                    <div>
+                        <label for="new-discord-id" class="block text-sm font-medium text-gray-700">ID Discord</label>
+                        <input type="text" id="new-discord-id" name="discord_id" required placeholder="ID Discord" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
                     </div>
                     <div>
                         <label for="new-implication-ig" class="block text-sm font-medium text-gray-700">Implication IG</label>
@@ -157,26 +185,26 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Données initiales de l'équipe, avec les noms et IDs Discord séparés
             let staffData = [
-                // Données initiales pour éviter un tableau vide au démarrage
-                { poste: "Administrateur", discord: "Sancho - 343744257523449856", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199003703577", ticket_panel: "Bon" },
-                { poste: "Administrateur", discord: "Kota Vandel - 837815169546584076", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197978769095", ticket_panel: "Moyen" },
-                { poste: "Modérateur Expert", discord: "Garoh - 611267447634395197", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198984315574", ticket_panel: "" },
-                { poste: "Modérateur Expert", discord: "Yuta - 577111679784189952", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198930092559", ticket_panel: "" },
-                { poste: "Modérateur Expert", discord: "Kintamo - 740200999221854280", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198965874283", ticket_panel: "" },
-                { poste: "Modérateur Expert", discord: "Yukai - 76561198257207372", implication_ig: "Bon", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198257207372", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Haakio - 398127648041205761", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197970892301", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Zenkai - 1176773441689497670", implication_ig: "Faible", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199570427503", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Jiinnn - 544228743992967198", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199083258134", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Aurelius - 320452860355543041", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198040241858", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Yli6s - 362297463891296267", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199400544206", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Amine - 736693072230614603", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199343058863", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Antho - 560451420315199279", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199027538864", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Kaizuro - 1009963891692413150", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199204985011", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Prat - 101047478060613140", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199496883813", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Jombo - 541002960616482846", implication_ig: "Inactif", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198351870401", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Rogue - 735572396500418570", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199013247705", ticket_panel: "" },
-                { poste: "Modérateur", discord: "Vlade - 321061482173431808", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/7656119810916321", ticket_panel: "" }
+                { poste: "Administrateur", discord_name: "Sancho", discord_id: "343744257523449856", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199003703577", ticket_panel: "Bon" },
+                { poste: "Administrateur", discord_name: "Kota Vandel", discord_id: "837815169546584076", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197978769095", ticket_panel: "Moyen" },
+                { poste: "Modérateur Expert", discord_name: "Garoh", discord_id: "611267447634395197", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198984315574", ticket_panel: "" },
+                { poste: "Modérateur Expert", discord_name: "Yuta", discord_id: "577111679784189952", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198930092559", ticket_panel: "" },
+                { poste: "Modérateur Expert", discord_name: "Kintamo", discord_id: "740200999221854280", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198965874283", ticket_panel: "" },
+                { poste: "Modérateur Expert", discord_name: "Yukai", discord_id: "76561198257207372", implication_ig: "Bon", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198257207372", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Haakio", discord_id: "398127648041205761", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197970892301", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Zenkai", discord_id: "1176773441689497670", implication_ig: "Faible", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199570427503", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Jiinnn", discord_id: "544228743992967198", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199083258134", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Aurelius", discord_id: "320452860355543041", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198040241858", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Yli6s", discord_id: "362297463891296267", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199400544206", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Amine", discord_id: "736693072230614603", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199343058863", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Antho", discord_id: "560451420315199279", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199027538864", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Kaizuro", discord_id: "1009963891692413150", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199204985011", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Prat", discord_id: "101047478060613140", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199496883813", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Jombo", discord_id: "541002960616482846", implication_ig: "Inactif", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198351870401", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Rogue", discord_id: "735572396500418570", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199013247705", ticket_panel: "" },
+                { poste: "Modérateur", discord_name: "Vlade", discord_id: "321061482173431808", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/7656119810916321", ticket_panel: "" }
             ];
 
             const tableBody = document.getElementById('staff-table-body');
@@ -184,7 +212,7 @@
             const toggleBtn = document.getElementById('toggle-form-btn');
             const formContainer = document.getElementById('add-staff-container');
             const toggleIcon = document.getElementById('toggle-icon');
-            
+
             // Ordre de priorité des postes pour le tri
             const posteOrder = ['Administrateur', 'Modérateur Expert', 'Modérateur'];
 
@@ -197,11 +225,19 @@
                 });
             }
 
+            // Fonction pour extraire l'ID Steam depuis le lien du panel
+            function getSteamId(url) {
+                if (!url) return 'Non disponible';
+                const parts = url.split('/');
+                const steamId = parts[parts.length - 1];
+                return steamId;
+            }
+
             // Fonction pour rendre le tableau
             function renderTable() {
-                // Trier les données avant de les rendre
                 const sortedData = sortStaffData(staffData);
-                tableBody.innerHTML = ''; // Nettoyer le tableau avant de le remplir
+                tableBody.innerHTML = ''; 
+
                 sortedData.forEach((member, index) => {
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-gray-50 transition-colors';
@@ -220,17 +256,82 @@
                         }
                         posteSelect.appendChild(option);
                     });
-                    // Écouter le changement de poste pour mettre à jour et trier
                     posteSelect.addEventListener('change', (e) => {
                         member.poste = e.target.value;
-                        renderTable(); // Re-render le tableau pour trier
+                        renderTable();
                     });
                     posteCell.appendChild(posteSelect);
 
-                    // Créer la cellule pour le nom Discord
+                    // Créer la cellule pour le nom Discord avec le menu déroulant
                     const discordCell = document.createElement('td');
-                    discordCell.className = 'px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 md:px-6';
-                    discordCell.textContent = member.discord;
+                    discordCell.className = 'px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 md:px-6 relative';
+                    
+                    const dropdownContainer = document.createElement('div');
+                    dropdownContainer.className = 'dropdown-container flex items-center';
+
+                    const discordNameSpan = document.createElement('span');
+                    discordNameSpan.className = 'cursor-pointer hover:underline';
+                    discordNameSpan.textContent = member.discord_name;
+                    dropdownContainer.appendChild(discordNameSpan);
+
+                    const editIcon = document.createElement('span');
+                    editIcon.className = 'ml-2 text-gray-400 cursor-pointer hover:text-blue-500';
+                    editIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
+                    editIcon.title = 'Double-clic pour modifier';
+                    dropdownContainer.appendChild(editIcon);
+
+                    const dropdownContent = document.createElement('div');
+                    dropdownContent.className = 'dropdown-content';
+                    
+                    const discordIdPara = document.createElement('p');
+                    discordIdPara.className = 'text-xs text-gray-600 mb-1';
+                    discordIdPara.textContent = `ID Discord: ${member.discord_id}`;
+                    dropdownContent.appendChild(discordIdPara);
+                    
+                    const steamIdPara = document.createElement('p');
+                    steamIdPara.className = 'text-xs text-gray-600';
+                    steamIdPara.textContent = `ID Steam: ${getSteamId(member.panel_url)}`;
+                    dropdownContent.appendChild(steamIdPara);
+                    
+                    dropdownContainer.appendChild(dropdownContent);
+                    discordCell.appendChild(dropdownContainer);
+                    
+                    // Gérer le simple clic pour ouvrir/fermer le menu déroulant
+                    discordNameSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+                            if (openDropdown !== dropdownContent) {
+                                openDropdown.classList.remove('show');
+                            }
+                        });
+                        dropdownContent.classList.toggle('show');
+                    });
+                    
+                    // Gérer le double-clic pour éditer le nom
+                    discordNameSpan.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = member.discord_name;
+                        input.className = 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
+
+                        // Remplacer le span par l'input
+                        discordNameSpan.replaceWith(input);
+                        editIcon.style.display = 'none'; // Cacher l'icône d'édition
+                        input.focus();
+
+                        const handleUpdate = () => {
+                            member.discord_name = input.value;
+                            renderTable();
+                        };
+
+                        input.addEventListener('blur', handleUpdate);
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                handleUpdate();
+                            }
+                        });
+                    });
 
                     // Créer la cellule pour l'implication IG
                     const igCell = document.createElement('td');
@@ -245,8 +346,10 @@
                         if (optionValue === member.implication_ig) {
                             option.selected = true;
                         }
-                        option.className = `bg-${getColorClass(optionValue)}-100`;
                         igSelect.appendChild(option);
+                    });
+                    igSelect.addEventListener('change', (e) => {
+                        member.implication_ig = e.target.value;
                     });
                     igCell.appendChild(igSelect);
                     
@@ -276,8 +379,10 @@
                         if (optionValue === member.ticket_panel) {
                             option.selected = true;
                         }
-                        option.className = `bg-${getColorClass(optionValue)}-100`;
                         ticketSelect.appendChild(option);
+                    });
+                    ticketSelect.addEventListener('change', (e) => {
+                        member.ticket_panel = e.target.value;
                     });
                     ticketCell.appendChild(ticketSelect);
 
@@ -290,7 +395,7 @@
                           <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
                         </svg>
                     `;
-                    deleteBtn.title = `Supprimer ${member.discord}`;
+                    deleteBtn.title = `Supprimer ${member.discord_name}`;
                     deleteBtn.onclick = () => handleDelete(index);
                     actionCell.appendChild(deleteBtn);
 
@@ -306,26 +411,20 @@
                 });
             }
 
-            // Fonction pour récupérer la classe de couleur Tailwind en fonction du statut
-            function getColorClass(status) {
-                switch (status) {
-                    case 'Excellent': return 'green';
-                    case 'Bon': return 'blue';
-                    case 'Moyen': return 'yellow';
-                    case 'Faible': return 'red';
-                    case 'Absent': return 'gray';
-                    case 'Inactif': return 'gray';
-                    case 'Nouveau': return 'purple';
-                    default: return 'gray';
-                }
-            }
+            // Fonction pour fermer les menus déroulants lorsqu'on clique en dehors
+            document.addEventListener('click', (e) => {
+                document.querySelectorAll('.dropdown-content.show').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            });
 
             // Fonction de gestion de l'ajout
             addForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const newMember = {
                     poste: e.target.poste.value,
-                    discord: e.target.discord.value,
+                    discord_name: e.target.discord_name.value,
+                    discord_id: e.target.discord_id.value,
                     implication_ig: e.target.implication_ig.value,
                     panel_url: e.target.panel_url.value,
                     ticket_panel: e.target.ticket_panel.value
