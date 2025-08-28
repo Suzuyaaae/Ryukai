@@ -6,6 +6,8 @@
     <title>Staff FA | Taux d'implication</title>
     <!-- Inclure Tailwind CSS pour le style -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclure Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2xltDkO/80yXwE7pX0R/0A/dJ8oJ2Fq8lK79fQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
@@ -30,14 +32,14 @@
             color: #2563eb;
             text-decoration: underline;
         }
-        /* Style pour les couleurs des lignes */
-        .color-excellent { background-color: #d1fae5; }
-        .color-bon { background-color: #e0e7ff; }
-        .color-moyen { background-color: #fef3c7; }
-        .color-faible { background-color: #fee2e2; }
-        .color-absent { background-color: #f3f4f6; }
-        .color-inactif { background-color: #e5e7eb; }
-        .color-nouveau { background-color: #f3e8ff; }
+        /* Style pour les couleurs des cellules d'implication */
+        .color-excellent { background-color: #bfdbfe; } /* Bleu clair */
+        .color-bon { background-color: #d1fae5; }    /* Vert clair */
+        .color-moyen { background-color: #fdb969; }    /* Orange clair */
+        .color-faible { background-color: #fecaca; }   /* Rouge clair */
+        .color-absent { background-color: #6b7280; }   /* Gris foncé */
+        .color-nouveau { background-color: #e9d5ff; }   /* Violet clair */
+        
         /* Style pour l'animation de dépliage */
         #add-staff-container {
             max-height: 0;
@@ -62,7 +64,7 @@
             display: none;
             position: absolute;
             background-color: #fff;
-            min-width: 160px;
+            min-width: 200px; /* Augmenter la largeur pour le bouton de copie */
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
             padding: 8px;
@@ -78,6 +80,41 @@
             transform: translateY(0);
             opacity: 1;
         }
+        .copy-btn {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .copy-btn:hover {
+            color: #2563eb;
+        }
+        .edit-info-form {
+            position: absolute;
+            background-color: #fff;
+            min-width: 250px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 2;
+            padding: 12px;
+            border-radius: 8px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        .edit-info-form.show {
+            display: block;
+        }
+        .info-display-box {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        .info-display-box p {
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
@@ -88,7 +125,7 @@
                 <img src="rykai.jpg" onerror="this.onerror=null;this.src='https://placehold.co/80x80/2563eb/ffffff?text=Ryukai'" alt="Logo Ryukai" class="w-16 h-16 sm:w-20 sm:h-20 mr-4 rounded-full shadow-md">
                 <div class="text-center sm:text-left">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Staff FA | Taux d'implication</h1>
-                    <p class="text-gray-500 text-sm sm:text-base">A remplir avant mercredi 20h</p>
+                    <p class="text-gray-500 text-sm sm:text-base">À remplir avant mercredi 20h</p>
                 </div>
             </div>
             <!-- Section pour la dernière mise à jour -->
@@ -107,7 +144,8 @@
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Discord</th>
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Implication IG</th>
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Panel</th>
-                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Ticket Panel</th>
+                        <!-- La colonne "Ticket Panel" a été renommée en "Information" -->
+                        <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Information</th>
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Action</th>
                     </tr>
                 </thead>
@@ -155,7 +193,6 @@
                             <option value="Moyen">Moyen</option>
                             <option value="Faible">Faible</option>
                             <option value="Absent">Absent</option>
-                            <option value="Inactif">Inactif</option>
                             <option value="Nouveau" selected>Nouveau</option>
                         </select>
                     </div>
@@ -163,15 +200,7 @@
                         <label for="new-panel-url" class="block text-sm font-medium text-gray-700">Lien Panel</label>
                         <input type="url" id="new-panel-url" name="panel_url" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
                     </div>
-                    <div>
-                        <label for="new-ticket-panel" class="block text-sm font-medium text-gray-700">Ticket Panel</label>
-                        <select id="new-ticket-panel" name="ticket_panel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
-                            <option value="">(Vide)</option>
-                            <option value="Bon">Bon</option>
-                            <option value="Moyen">Moyen</option>
-                            <option value="Faible">Faible</option>
-                        </select>
-                    </div>
+                    <!-- On retire la sélection du ticket panel de la nouvelle personne car c'est une info à ajouter après -->
                     <div class="md:col-span-2 lg:col-span-3 flex items-end">
                         <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                             Ajouter le membre
@@ -185,27 +214,43 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Données initiales de l'équipe, avec les noms et IDs Discord séparés
-            let staffData = [
-                { poste: "Administrateur", discord_name: "Sancho", discord_id: "343744257523449856", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199003703577", ticket_panel: "Bon" },
-                { poste: "Administrateur", discord_name: "Kota Vandel", discord_id: "837815169546584076", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197978769095", ticket_panel: "Moyen" },
-                { poste: "Modérateur Expert", discord_name: "Garoh", discord_id: "611267447634395197", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198984315574", ticket_panel: "" },
-                { poste: "Modérateur Expert", discord_name: "Yuta", discord_id: "577111679784189952", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198930092559", ticket_panel: "" },
-                { poste: "Modérateur Expert", discord_name: "Kintamo", discord_id: "740200999221854280", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198965874283", ticket_panel: "" },
-                { poste: "Modérateur Expert", discord_name: "Yukai", discord_id: "76561198257207372", implication_ig: "Bon", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198257207372", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Haakio", discord_id: "398127648041205761", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197970892301", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Zenkai", discord_id: "1176773441689497670", implication_ig: "Faible", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199570427503", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Jiinnn", discord_id: "544228743992967198", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199083258134", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Aurelius", discord_id: "320452860355543041", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198040241858", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Yli6s", discord_id: "362297463891296267", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199400544206", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Amine", discord_id: "736693072230614603", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199343058863", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Antho", discord_id: "560451420315199279", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199027538864", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Kaizuro", discord_id: "1009963891692413150", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199204985011", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Prat", discord_id: "101047478060613140", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199496883813", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Jombo", discord_id: "541002960616482846", implication_ig: "Inactif", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198351870401", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Rogue", discord_id: "735572396500418570", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199013247705", ticket_panel: "" },
-                { poste: "Modérateur", discord_name: "Vlade", discord_id: "321061482173431808", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/7656119810916321", ticket_panel: "" }
+            // Clé pour le localStorage
+            const LOCAL_STORAGE_KEY = 'staffDataFA';
+
+            // Données initiales par défaut
+            const defaultStaffData = [
+                { poste: "Administrateur", discord_name: "Sancho", discord_id: "343744257523449856", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199003703577", tickets_ig: "45", tickets_panel: "Bon" },
+                { poste: "Administrateur", discord_name: "Kota Vandel", discord_id: "837815169546584076", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197978769095", tickets_ig: "20", tickets_panel: "Moyen" },
+                { poste: "Modérateur Expert", discord_name: "Garoh", discord_id: "611267447634395197", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198984315574", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur Expert", discord_name: "Yuta", discord_id: "577111679784189952", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198930092559", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur Expert", discord_name: "Kintamo", discord_id: "740200999221854280", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198965874283", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur Expert", discord_name: "Yukai", discord_id: "76561198257207372", implication_ig: "Bon", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198257207372", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Haakio", discord_id: "398127648041205761", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197970892301", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Zenkai", discord_id: "1176773441689497670", implication_ig: "Faible", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199570427503", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Jiinnn", discord_id: "544228743992967198", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199083258134", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Aurelius", discord_id: "320452860355543041", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198040241858", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Yli6s", discord_id: "362297463891296267", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199400544206", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Amine", discord_id: "736693072230614603", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199343058863", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Antho", discord_id: "560451420315199279", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199027538864", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Kaizuro", discord_id: "1009963891692413150", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199204985011", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Prat", discord_id: "101047478060613140", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199496883813", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Rogue", discord_id: "735572396500418570", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199013247705", tickets_ig: "", tickets_panel: "" },
+                { poste: "Modérateur", discord_name: "Vlade", discord_id: "321061482173431808", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/7656119810916321", tickets_ig: "", tickets_panel: "" }
             ];
+
+            // Initialiser staffData en essayant de charger depuis le localStorage
+            let staffData = [];
+            try {
+                const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (storedData) {
+                    staffData = JSON.parse(storedData);
+                } else {
+                    staffData = defaultStaffData;
+                }
+            } catch (error) {
+                console.error("Erreur lors du chargement des données depuis le localStorage:", error);
+                staffData = defaultStaffData;
+            }
 
             const tableBody = document.getElementById('staff-table-body');
             const addForm = document.getElementById('add-staff-form');
@@ -216,9 +261,18 @@
             // Ordre de priorité des postes pour le tri
             const posteOrder = ['Administrateur', 'Modérateur Expert', 'Modérateur'];
 
+            // Fonction pour sauvegarder les données dans le localStorage
+            function saveDataToLocalStorage() {
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(staffData));
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde des données dans le localStorage:", error);
+                }
+            }
+
             // Fonction pour trier les données
             function sortStaffData(data) {
-                return data.sort((a, b) => {
+                return [...data].sort((a, b) => {
                     const orderA = posteOrder.indexOf(a.poste);
                     const orderB = posteOrder.indexOf(b.poste);
                     return orderA - orderB;
@@ -233,6 +287,38 @@
                 return steamId;
             }
 
+            // Fonction pour copier du texte dans le presse-papiers
+            function copyToClipboard(text) {
+                const tempInput = document.createElement('input');
+                document.body.appendChild(tempInput);
+                tempInput.value = text;
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showNotification('Copié !');
+            }
+
+            // Fonction pour afficher une notification de copie
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300';
+                document.body.appendChild(notification);
+                
+                // Animer la notification
+                setTimeout(() => {
+                    notification.classList.add('opacity-100');
+                }, 10);
+
+                // Disparaître après 2 secondes
+                setTimeout(() => {
+                    notification.classList.remove('opacity-100');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 2000);
+            }
+
             // Fonction pour rendre le tableau
             function renderTable() {
                 const sortedData = sortStaffData(staffData);
@@ -240,7 +326,7 @@
 
                 sortedData.forEach((member, index) => {
                     const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition-colors';
+                    row.className = `hover:bg-gray-50 transition-colors`;
 
                     // Créer la cellule pour le poste
                     const posteCell = document.createElement('td');
@@ -258,7 +344,8 @@
                     });
                     posteSelect.addEventListener('change', (e) => {
                         member.poste = e.target.value;
-                        renderTable();
+                        saveDataToLocalStorage();
+                        renderTable(); // Re-render pour appliquer la couleur et le tri
                     });
                     posteCell.appendChild(posteSelect);
 
@@ -283,14 +370,33 @@
                     const dropdownContent = document.createElement('div');
                     dropdownContent.className = 'dropdown-content';
                     
+                    // Ligne pour l'ID Discord
                     const discordIdPara = document.createElement('p');
-                    discordIdPara.className = 'text-xs text-gray-600 mb-1';
-                    discordIdPara.textContent = `ID Discord: ${member.discord_id}`;
+                    discordIdPara.className = 'text-sm text-gray-900 flex items-center justify-between mb-1';
+                    discordIdPara.innerHTML = `
+                        <span><i class="fab fa-discord mr-2 text-indigo-500"></i>ID Discord:</span>
+                        <span class="flex items-center">
+                            <span class="text-xs text-gray-600 font-mono mr-2 truncate" title="${member.discord_id}">${member.discord_id}</span>
+                            <button class="copy-btn text-gray-400 hover:text-blue-500" title="Copier l'ID Discord" onclick="copyToClipboard('${member.discord_id}')">
+                                <i class="far fa-clipboard"></i>
+                            </button>
+                        </span>
+                    `;
                     dropdownContent.appendChild(discordIdPara);
                     
+                    // Ligne pour l'ID Steam
+                    const steamId = getSteamId(member.panel_url);
                     const steamIdPara = document.createElement('p');
-                    steamIdPara.className = 'text-xs text-gray-600';
-                    steamIdPara.textContent = `ID Steam: ${getSteamId(member.panel_url)}`;
+                    steamIdPara.className = 'text-sm text-gray-900 flex items-center justify-between';
+                    steamIdPara.innerHTML = `
+                        <span><i class="fab fa-steam-symbol mr-2 text-gray-600"></i>ID Steam:</span>
+                        <span class="flex items-center">
+                            <span class="text-xs text-gray-600 font-mono mr-2 truncate" title="${steamId}">${steamId}</span>
+                            <button class="copy-btn text-gray-400 hover:text-blue-500" title="Copier l'ID Steam" onclick="copyToClipboard('${steamId}')">
+                                <i class="far fa-clipboard"></i>
+                            </button>
+                        </span>
+                    `;
                     dropdownContent.appendChild(steamIdPara);
                     
                     dropdownContainer.appendChild(dropdownContent);
@@ -299,6 +405,7 @@
                     // Gérer le simple clic pour ouvrir/fermer le menu déroulant
                     discordNameSpan.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        // Fermer tous les autres dropdowns ouverts
                         document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
                             if (openDropdown !== dropdownContent) {
                                 openDropdown.classList.remove('show');
@@ -322,6 +429,7 @@
 
                         const handleUpdate = () => {
                             member.discord_name = input.value;
+                            saveDataToLocalStorage();
                             renderTable();
                         };
 
@@ -333,12 +441,12 @@
                         });
                     });
 
-                    // Créer la cellule pour l'implication IG
+                    // Créer la cellule pour l'implication IG et lui appliquer la classe de couleur
                     const igCell = document.createElement('td');
-                    igCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
+                    igCell.className = `px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6 color-${member.implication_ig.toLowerCase().replace(' ', '-')}`;
                     const igSelect = document.createElement('select');
                     igSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
-                    const igOptions = ['Excellent', 'Bon', 'Moyen', 'Faible', 'Absent', 'Inactif', 'Nouveau'];
+                    const igOptions = ['Excellent', 'Bon', 'Moyen', 'Faible', 'Absent', 'Nouveau'];
                     igOptions.forEach(optionValue => {
                         const option = document.createElement('option');
                         option.value = optionValue;
@@ -350,6 +458,8 @@
                     });
                     igSelect.addEventListener('change', (e) => {
                         member.implication_ig = e.target.value;
+                        saveDataToLocalStorage();
+                        renderTable(); // Re-render pour appliquer la couleur
                     });
                     igCell.appendChild(igSelect);
                     
@@ -366,32 +476,86 @@
                         panelCell.appendChild(panelLink);
                     }
 
-                    // Créer la cellule pour le ticket panel
-                    const ticketCell = document.createElement('td');
-                    ticketCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
-                    const ticketSelect = document.createElement('select');
-                    ticketSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
-                    const ticketOptions = ['', 'Bon', 'Moyen', 'Faible'];
-                    ticketOptions.forEach(optionValue => {
-                        const option = document.createElement('option');
-                        option.value = optionValue;
-                        option.textContent = optionValue || '(Vide)';
-                        if (optionValue === member.ticket_panel) {
-                            option.selected = true;
-                        }
-                        ticketSelect.appendChild(option);
-                    });
-                    ticketSelect.addEventListener('change', (e) => {
-                        member.ticket_panel = e.target.value;
-                    });
-                    ticketCell.appendChild(ticketSelect);
+                    // Créer la nouvelle cellule "Information" avec l'ID Steam
+                    const infoCell = document.createElement('td');
+                    infoCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6 relative';
+                    const steamId_infoCell = getSteamId(member.panel_url);
+                    const infoSpan = document.createElement('span');
+                    infoSpan.textContent = steamId_infoCell;
+                    infoSpan.className = 'cursor-pointer hover:underline text-gray-600 font-mono';
+                    infoCell.appendChild(infoSpan);
 
-                    // Créer la cellule pour la suppression
+                    // Conteneur pour l'affichage des informations au clic
+                    const infoDisplayContainer = document.createElement('div');
+                    infoDisplayContainer.className = 'dropdown-content';
+                    infoDisplayContainer.innerHTML = `
+                        <p class="text-xs font-semibold mb-1">Détails des tickets :</p>
+                        <p class="text-sm">Tickets IG: <span class="font-medium">${member.tickets_ig || 'N/A'}</span></p>
+                        <p class="text-sm">Tickets Panel: <span class="font-medium">${member.tickets_panel || 'N/A'}</span></p>
+                    `;
+                    infoCell.appendChild(infoDisplayContainer);
+
+                    // Événement pour afficher les infos au clic simple
+                    infoSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+                            openDropdown.classList.remove('show');
+                        });
+                        infoDisplayContainer.classList.toggle('show');
+                    });
+
+                    // Événement pour afficher le formulaire de modification au double-clic
+                    infoSpan.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Créer et afficher le formulaire de modification
+                        const form = document.createElement('div');
+                        form.className = 'edit-info-form show';
+                        form.innerHTML = `
+                            <p class="text-md font-semibold mb-2">Modifier les tickets de ${member.discord_name}</p>
+                            <div class="mb-2">
+                                <label class="block text-sm font-medium text-gray-700">Tickets IG</label>
+                                <input type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2" value="${member.tickets_ig}">
+                            </div>
+                            <div class="mb-2">
+                                <label class="block text-sm font-medium text-gray-700">Tickets Panel</label>
+                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2" value="${member.tickets_panel}">
+                            </div>
+                            <button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                                Enregistrer
+                            </button>
+                        `;
+
+                        // Remplacer l'élément existant par le formulaire
+                        infoCell.innerHTML = '';
+                        infoCell.appendChild(form);
+
+                        // Gérer l'enregistrement
+                        form.querySelector('button').addEventListener('click', () => {
+                            const newTicketsIg = form.querySelector('input[type="number"]').value;
+                            const newTicketsPanel = form.querySelector('input[type="text"]').value;
+                            member.tickets_ig = newTicketsIg;
+                            member.tickets_panel = newTicketsPanel;
+                            saveDataToLocalStorage();
+                            renderTable(); // Re-render pour afficher les nouvelles données
+                        });
+
+                        // Fermer le formulaire si on clique en dehors
+                        document.addEventListener('click', (clickEvent) => {
+                            if (!form.contains(clickEvent.target) && clickEvent.target !== infoSpan) {
+                                renderTable();
+                            }
+                        }, { once: true });
+                    });
+
+                    // Créer la cellule pour la suppression (maintenant en dernier)
                     const actionCell = document.createElement('td');
                     actionCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
                     const deleteBtn = document.createElement('button');
+                    // Ajout d'une classe pour l'effet de survol
+                    deleteBtn.className = 'text-red-500 hover:text-red-700 transition-colors';
                     deleteBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 hover:text-red-700 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
                         </svg>
                     `;
@@ -399,12 +563,12 @@
                     deleteBtn.onclick = () => handleDelete(index);
                     actionCell.appendChild(deleteBtn);
 
-                    // Ajouter toutes les cellules à la ligne
+                    // Ajouter toutes les cellules à la ligne dans le bon ordre
                     row.appendChild(posteCell);
                     row.appendChild(discordCell);
                     row.appendChild(igCell);
                     row.appendChild(panelCell);
-                    row.appendChild(ticketCell);
+                    row.appendChild(infoCell);
                     row.appendChild(actionCell);
 
                     tableBody.appendChild(row);
@@ -427,9 +591,12 @@
                     discord_id: e.target.discord_id.value,
                     implication_ig: e.target.implication_ig.value,
                     panel_url: e.target.panel_url.value,
-                    ticket_panel: e.target.ticket_panel.value
+                    // Les nouvelles informations sont initialisées à vide
+                    tickets_ig: '',
+                    tickets_panel: ''
                 };
                 staffData.push(newMember);
+                saveDataToLocalStorage();
                 renderTable(); // Re-render pour trier le nouveau membre
                 addForm.reset();
             });
@@ -442,6 +609,7 @@
 
                 if (originalIndex !== -1) {
                     staffData.splice(originalIndex, 1);
+                    saveDataToLocalStorage();
                     renderTable(); // Re-render le tableau après suppression
                 }
             }
@@ -454,6 +622,10 @@
 
             // Rendre le tableau au chargement de la page
             renderTable();
+
+            // Attacher les fonctions globales au window pour les rendre accessibles dans le HTML
+            window.copyToClipboard = copyToClipboard;
+            window.handleDelete = handleDelete; // Exposer la fonction handleDelete
         });
     </script>
 
