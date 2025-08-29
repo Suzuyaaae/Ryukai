@@ -7,7 +7,7 @@
     <!-- Inclure Tailwind CSS pour le style -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inclure Font Awesome pour les icônes -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2xltDkO/80yXwE7pX0R/0A/dJ8oJ2Fq8lK79fQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2xltDkO/80yXwE7pX0R/0A/dJ8oJ2Fq8lK79fQ==`" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body {
@@ -25,6 +25,10 @@
             padding-right: 2rem;
             cursor: pointer;
         }
+        select:focus, input:focus, button:focus {
+            outline: none;
+            box-shadow: none;
+        }
         .profile-link {
             transition: color 0.2s ease-in-out;
         }
@@ -32,22 +36,24 @@
             color: #2563eb;
             text-decoration: underline;
         }
-        /* Style pour les couleurs des cellules d'implication */
-        .color-excellent { background-color: #bfdbfe; } /* Bleu clair */
-        .color-bon { background-color: #d1fae5; }    /* Vert clair */
-        .color-moyen { background-color: #fdb969; }    /* Orange clair */
-        .color-faible { background-color: #fecaca; }   /* Rouge clair */
-        .color-absent { background-color: #6b7280; }   /* Gris foncé */
-        .color-nouveau { background-color: #e9d5ff; }   /* Violet clair */
+        .color-excellent { background-color: #bfdbfe; }
+        .color-bon { background-color: #d1fae5; }
+        .color-moyen { background-color: #fdb969; }
+        .color-faible { background-color: #fecaca; }
+        .color-absent { background-color: #6b7280; }
+        .color-nouveau { background-color: #e9d5ff; }
         
-        /* Style pour l'animation de dépliage */
+        .color-Administrateur { background-color: #fde68a; }
+        .color-Modérateur { background-color: #bfdbfe; }
+        .color-Modérateur-Expert { background-color: #d1fae5; }
+
         #add-staff-container {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out;
         }
         #add-staff-container.open {
-            max-height: 500px; /* Une valeur assez grande pour contenir le formulaire */
+            max-height: 500px;
             transition: max-height 0.5s ease-in;
         }
         .rotate-icon {
@@ -64,12 +70,12 @@
             display: none;
             position: absolute;
             background-color: #fff;
-            min-width: 200px; /* Augmenter la largeur pour le bouton de copie */
+            min-width: 200px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
             padding: 8px;
             border-radius: 8px;
-            top: 100%; /* Positionne le menu en dessous du nom */
+            top: 100%;
             left: 0;
             transform: translateY(10px);
             opacity: 0;
@@ -115,27 +121,109 @@
         .info-display-box p {
             margin-bottom: 4px;
         }
+        #code-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        #code-modal {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transition: transform 0.3s ease-in-out;
+        }
+        #code-modal.shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        #confirmation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 51;
+        }
+        #confirmation-modal {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
-    <div class="bg-white rounded-xl shadow-2xl p-4 sm:p-8 max-w-6xl w-full mx-auto my-8 border border-gray-200">
-        <!-- En-tête avec logo et titre -->
+    
+    <!-- Overlay de saisie du code -->
+    <div id="code-overlay">
+        <div id="code-modal" class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-auto">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Accès au tableau</h2>
+            <p class="text-gray-500 mb-6">Veuillez entrer le code d'accès pour continuer.</p>
+            <input type="password" id="access-code-input" class="w-full text-center text-lg p-3 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors" placeholder="Entrez le code ici" autocomplete="off">
+            <button id="submit-code-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                Accéder
+            </button>
+            <p id="error-message" class="text-red-500 text-sm mt-4 hidden">Code incorrect. Veuillez réessayer.</p>
+        </div>
+    </div>
+
+    <!-- Modale de confirmation de suppression -->
+    <div id="confirmation-overlay">
+        <div id="confirmation-modal" class="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full mx-auto">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmation</h3>
+            <p id="confirmation-text" class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer ce membre ?</p>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-delete-btn" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors">
+                    Confirmer
+                </button>
+                <button id="cancel-delete-btn" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content" class="bg-white rounded-xl shadow-2xl p-4 sm:p-8 max-w-6xl w-full mx-auto my-8 border border-gray-200 hidden">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-6">
             <div class="flex items-center mb-4 sm:mb-0">
-                <img src="rykai.jpg" onerror="this.onerror=null;this.src='https://placehold.co/80x80/2563eb/ffffff?text=Ryukai'" alt="Logo Ryukai" class="w-16 h-16 sm:w-20 sm:h-20 mr-4 rounded-full shadow-md">
+                <img src="ryukai.jpg" onerror="this.onerror=null;this.src='https://placehold.co/80x80/2563eb/ffffff?text=Ryukai'" alt="Logo Ryukai" class="w-16 h-16 sm:w-20 sm:h-20 mr-4 rounded-full shadow-md">
                 <div class="text-center sm:text-left">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Staff FA | Taux d'implication</h1>
                     <p class="text-gray-500 text-sm sm:text-base">À remplir avant mercredi 20h</p>
+                    <p class="text-xs text-gray-400 mt-1">ID utilisateur : <span id="user-id-display"></span></p>
                 </div>
             </div>
-            <!-- Section pour la dernière mise à jour -->
             <div class="text-right mt-4 sm:mt-0">
                 <label for="last-update" class="text-gray-600 text-sm font-semibold block">Dernière mise à jour :</label>
                 <input type="date" id="last-update" class="mt-1 block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1.5" value="2025-08-27">
             </div>
         </div>
         
-        <!-- Tableau des données -->
         <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm mb-6">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -144,7 +232,6 @@
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Discord</th>
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Implication IG</th>
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Panel</th>
-                        <!-- La colonne "Ticket Panel" a été renommée en "Information" -->
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Information</th>
                         <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:px-6">Action</th>
                     </tr>
@@ -155,7 +242,6 @@
             </table>
         </div>
 
-        <!-- Bouton pour afficher/cacher le formulaire -->
         <div class="text-center">
             <button id="toggle-form-btn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                 <span class="mr-2">Ajouter un nouveau membre</span>
@@ -165,7 +251,6 @@
             </button>
         </div>
         
-        <!-- Conteneur du formulaire qui sera replié/déplié -->
         <div id="add-staff-container" class="mt-6">
             <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
                 <form id="add-staff-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -200,7 +285,6 @@
                         <label for="new-panel-url" class="block text-sm font-medium text-gray-700">Lien Panel</label>
                         <input type="url" id="new-panel-url" name="panel_url" placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2">
                     </div>
-                    <!-- On retire la sélection du ticket panel de la nouvelle personne car c'est une info à ajouter après -->
                     <div class="md:col-span-2 lg:col-span-3 flex items-end">
                         <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                             Ajouter le membre
@@ -209,425 +293,473 @@
                 </form>
             </div>
         </div>
-
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Clé pour le localStorage
-            const LOCAL_STORAGE_KEY = 'staffDataFA';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // Variables globales fournies par l'environnement
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
 
-            // Données initiales par défaut
-            const defaultStaffData = [
-                { poste: "Administrateur", discord_name: "Sancho", discord_id: "343744257523449856", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199003703577", tickets_ig: "45", tickets_panel: "Bon" },
-                { poste: "Administrateur", discord_name: "Kota Vandel", discord_id: "837815169546584076", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197978769095", tickets_ig: "20", tickets_panel: "Moyen" },
-                { poste: "Modérateur Expert", discord_name: "Garoh", discord_id: "611267447634395197", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198984315574", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur Expert", discord_name: "Yuta", discord_id: "577111679784189952", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198930092559", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur Expert", discord_name: "Kintamo", discord_id: "740200999221854280", implication_ig: "Excellent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198965874283", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur Expert", discord_name: "Yukai", discord_id: "76561198257207372", implication_ig: "Bon", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198257207372", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Haakio", discord_id: "398127648041205761", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561197970892301", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Zenkai", discord_id: "1176773441689497670", implication_ig: "Faible", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199570427503", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Jiinnn", discord_id: "544228743992967198", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199083258134", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Aurelius", discord_id: "320452860355543041", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561198040241858", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Yli6s", discord_id: "362297463891296267", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199400544206", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Amine", discord_id: "736693072230614603", implication_ig: "Absent", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199343058863", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Antho", discord_id: "560451420315199279", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199027538864", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Kaizuro", discord_id: "1009963891692413150", implication_ig: "Moyen", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199204985011", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Prat", discord_id: "101047478060613140", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199496883813", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Rogue", discord_id: "735572396500418570", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/76561199013247705", tickets_ig: "", tickets_panel: "" },
-                { poste: "Modérateur", discord_name: "Vlade", discord_id: "321061482173431808", implication_ig: "Nouveau", panel_url: "https://panel.ryukai-rp.com/dashboard/profile/7656119810916321", tickets_ig: "", tickets_panel: "" }
-            ];
+        const ACCESS_CODE = 'ryukai-2k25';
+        const codeInput = document.getElementById('access-code-input');
+        const submitCodeBtn = document.getElementById('submit-code-btn');
+        const codeOverlay = document.getElementById('code-overlay');
+        const codeModal = document.getElementById('code-modal');
+        const mainContent = document.getElementById('main-content');
+        const errorMessage = document.getElementById('error-message');
+        const userIdDisplay = document.getElementById('user-id-display');
+        
+        const confirmationOverlay = document.getElementById('confirmation-overlay');
+        const confirmationText = document.getElementById('confirmation-text');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-            // Initialiser staffData en essayant de charger depuis le localStorage
-            let staffData = [];
+        let memberToDeleteId = null;
+
+        const tableBody = document.getElementById('staff-table-body');
+        const addForm = document.getElementById('add-staff-form');
+        const toggleBtn = document.getElementById('toggle-form-btn');
+        const formContainer = document.getElementById('add-staff-container');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        // Ordre de priorité des postes pour le tri
+        const posteOrder = ['Administrateur', 'Modérateur Expert', 'Modérateur'];
+        
+        // Initialisation de Firebase et authentification
+        async function initializeFirebase() {
             try {
-                const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-                if (storedData) {
-                    staffData = JSON.parse(storedData);
-                } else {
-                    staffData = defaultStaffData;
-                }
-            } catch (error) {
-                console.error("Erreur lors du chargement des données depuis le localStorage:", error);
-                staffData = defaultStaffData;
-            }
-
-            const tableBody = document.getElementById('staff-table-body');
-            const addForm = document.getElementById('add-staff-form');
-            const toggleBtn = document.getElementById('toggle-form-btn');
-            const formContainer = document.getElementById('add-staff-container');
-            const toggleIcon = document.getElementById('toggle-icon');
-
-            // Ordre de priorité des postes pour le tri
-            const posteOrder = ['Administrateur', 'Modérateur Expert', 'Modérateur'];
-
-            // Fonction pour sauvegarder les données dans le localStorage
-            function saveDataToLocalStorage() {
-                try {
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(staffData));
-                } catch (error) {
-                    console.error("Erreur lors de la sauvegarde des données dans le localStorage:", error);
-                }
-            }
-
-            // Fonction pour trier les données
-            function sortStaffData(data) {
-                return [...data].sort((a, b) => {
-                    const orderA = posteOrder.indexOf(a.poste);
-                    const orderB = posteOrder.indexOf(b.poste);
-                    return orderA - orderB;
-                });
-            }
-
-            // Fonction pour extraire l'ID Steam depuis le lien du panel
-            function getSteamId(url) {
-                if (!url) return 'Non disponible';
-                const parts = url.split('/');
-                const steamId = parts[parts.length - 1];
-                return steamId;
-            }
-
-            // Fonction pour copier du texte dans le presse-papiers
-            function copyToClipboard(text) {
-                const tempInput = document.createElement('input');
-                document.body.appendChild(tempInput);
-                tempInput.value = text;
-                tempInput.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempInput);
-                showNotification('Copié !');
-            }
-
-            // Fonction pour afficher une notification de copie
-            function showNotification(message) {
-                const notification = document.createElement('div');
-                notification.textContent = message;
-                notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300';
-                document.body.appendChild(notification);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
                 
-                // Animer la notification
-                setTimeout(() => {
-                    notification.classList.add('opacity-100');
-                }, 10);
-
-                // Disparaître après 2 secondes
-                setTimeout(() => {
-                    notification.classList.remove('opacity-100');
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 300);
-                }, 2000);
-            }
-
-            // Fonction pour rendre le tableau
-            function renderTable() {
-                const sortedData = sortStaffData(staffData);
-                tableBody.innerHTML = ''; 
-
-                sortedData.forEach((member, index) => {
-                    const row = document.createElement('tr');
-                    row.className = `hover:bg-gray-50 transition-colors`;
-
-                    // Créer la cellule pour le poste
-                    const posteCell = document.createElement('td');
-                    posteCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6';
-                    const posteSelect = document.createElement('select');
-                    posteSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
-                    ['Administrateur', 'Modérateur Expert', 'Modérateur'].forEach(optionValue => {
-                        const option = document.createElement('option');
-                        option.value = optionValue;
-                        option.textContent = optionValue;
-                        if (optionValue === member.poste) {
-                            option.selected = true;
-                        }
-                        posteSelect.appendChild(option);
-                    });
-                    posteSelect.addEventListener('change', (e) => {
-                        member.poste = e.target.value;
-                        saveDataToLocalStorage();
-                        renderTable(); // Re-render pour appliquer la couleur et le tri
-                    });
-                    posteCell.appendChild(posteSelect);
-
-                    // Créer la cellule pour le nom Discord avec le menu déroulant
-                    const discordCell = document.createElement('td');
-                    discordCell.className = 'px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 md:px-6 relative';
-                    
-                    const dropdownContainer = document.createElement('div');
-                    dropdownContainer.className = 'dropdown-container flex items-center';
-
-                    const discordNameSpan = document.createElement('span');
-                    discordNameSpan.className = 'cursor-pointer hover:underline';
-                    discordNameSpan.textContent = member.discord_name;
-                    dropdownContainer.appendChild(discordNameSpan);
-
-                    const editIcon = document.createElement('span');
-                    editIcon.className = 'ml-2 text-gray-400 cursor-pointer hover:text-blue-500';
-                    editIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
-                    editIcon.title = 'Double-clic pour modifier';
-                    dropdownContainer.appendChild(editIcon);
-
-                    const dropdownContent = document.createElement('div');
-                    dropdownContent.className = 'dropdown-content';
-                    
-                    // Ligne pour l'ID Discord
-                    const discordIdPara = document.createElement('p');
-                    discordIdPara.className = 'text-sm text-gray-900 flex items-center justify-between mb-1';
-                    discordIdPara.innerHTML = `
-                        <span><i class="fab fa-discord mr-2 text-indigo-500"></i>ID Discord:</span>
-                        <span class="flex items-center">
-                            <span class="text-xs text-gray-600 font-mono mr-2 truncate" title="${member.discord_id}">${member.discord_id}</span>
-                            <button class="copy-btn text-gray-400 hover:text-blue-500" title="Copier l'ID Discord" onclick="copyToClipboard('${member.discord_id}')">
-                                <i class="far fa-clipboard"></i>
-                            </button>
-                        </span>
-                    `;
-                    dropdownContent.appendChild(discordIdPara);
-                    
-                    // Ligne pour l'ID Steam
-                    const steamId = getSteamId(member.panel_url);
-                    const steamIdPara = document.createElement('p');
-                    steamIdPara.className = 'text-sm text-gray-900 flex items-center justify-between';
-                    steamIdPara.innerHTML = `
-                        <span><i class="fab fa-steam-symbol mr-2 text-gray-600"></i>ID Steam:</span>
-                        <span class="flex items-center">
-                            <span class="text-xs text-gray-600 font-mono mr-2 truncate" title="${steamId}">${steamId}</span>
-                            <button class="copy-btn text-gray-400 hover:text-blue-500" title="Copier l'ID Steam" onclick="copyToClipboard('${steamId}')">
-                                <i class="far fa-clipboard"></i>
-                            </button>
-                        </span>
-                    `;
-                    dropdownContent.appendChild(steamIdPara);
-                    
-                    dropdownContainer.appendChild(dropdownContent);
-                    discordCell.appendChild(dropdownContainer);
-                    
-                    // Gérer le simple clic pour ouvrir/fermer le menu déroulant
-                    discordNameSpan.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        // Fermer tous les autres dropdowns ouverts
-                        document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
-                            if (openDropdown !== dropdownContent) {
-                                openDropdown.classList.remove('show');
-                            }
-                        });
-                        dropdownContent.classList.toggle('show');
-                    });
-                    
-                    // Gérer le double-clic pour éditer le nom
-                    discordNameSpan.addEventListener('dblclick', (e) => {
-                        e.preventDefault();
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.value = member.discord_name;
-                        input.className = 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
-
-                        // Remplacer le span par l'input
-                        discordNameSpan.replaceWith(input);
-                        editIcon.style.display = 'none'; // Cacher l'icône d'édition
-                        input.focus();
-
-                        const handleUpdate = () => {
-                            member.discord_name = input.value;
-                            saveDataToLocalStorage();
-                            renderTable();
-                        };
-
-                        input.addEventListener('blur', handleUpdate);
-                        input.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter') {
-                                handleUpdate();
-                            }
-                        });
-                    });
-
-                    // Créer la cellule pour l'implication IG et lui appliquer la classe de couleur
-                    const igCell = document.createElement('td');
-                    igCell.className = `px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6 color-${member.implication_ig.toLowerCase().replace(' ', '-')}`;
-                    const igSelect = document.createElement('select');
-                    igSelect.className = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
-                    const igOptions = ['Excellent', 'Bon', 'Moyen', 'Faible', 'Absent', 'Nouveau'];
-                    igOptions.forEach(optionValue => {
-                        const option = document.createElement('option');
-                        option.value = optionValue;
-                        option.textContent = optionValue;
-                        if (optionValue === member.implication_ig) {
-                            option.selected = true;
-                        }
-                        igSelect.appendChild(option);
-                    });
-                    igSelect.addEventListener('change', (e) => {
-                        member.implication_ig = e.target.value;
-                        saveDataToLocalStorage();
-                        renderTable(); // Re-render pour appliquer la couleur
-                    });
-                    igCell.appendChild(igSelect);
-                    
-                    // Créer la cellule pour le panel
-                    const panelCell = document.createElement('td');
-                    panelCell.className = 'px-3 py-4 whitespace-nowrap text-sm md:px-6';
-                    if (member.panel_url) {
-                        const panelLink = document.createElement('a');
-                        panelLink.href = member.panel_url;
-                        panelLink.target = '_blank';
-                        panelLink.rel = 'noopener noreferrer';
-                        panelLink.className = 'text-blue-600 hover:text-blue-800 profile-link';
-                        panelLink.textContent = 'Lien';
-                        panelCell.appendChild(panelLink);
+                await new Promise((resolve, reject) => {
+                    if (initialAuthToken) {
+                        signInWithCustomToken(auth, initialAuthToken)
+                            .then((userCredential) => {
+                                userId = userCredential.user.uid;
+                                console.log("Authentification réussie !");
+                                resolve();
+                            }).catch((error) => {
+                                console.error("Erreur d'authentification avec le token personnalisé :", error);
+                                signInAnonymously(auth)
+                                    .then(() => {
+                                        userId = auth.currentUser.uid;
+                                        resolve();
+                                    }).catch(e => {
+                                        console.error("Erreur d'authentification anonyme :", e);
+                                        reject(e);
+                                    });
+                            });
+                    } else {
+                        signInAnonymously(auth)
+                            .then(() => {
+                                userId = auth.currentUser.uid;
+                                resolve();
+                            }).catch(e => {
+                                console.error("Erreur d'authentification anonyme :", e);
+                                reject(e);
+                            });
                     }
-
-                    // Créer la nouvelle cellule "Information" avec l'ID Steam
-                    const infoCell = document.createElement('td');
-                    infoCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6 relative';
-                    const steamId_infoCell = getSteamId(member.panel_url);
-                    const infoSpan = document.createElement('span');
-                    infoSpan.textContent = steamId_infoCell;
-                    infoSpan.className = 'cursor-pointer hover:underline text-gray-600 font-mono';
-                    infoCell.appendChild(infoSpan);
-
-                    // Conteneur pour l'affichage des informations au clic
-                    const infoDisplayContainer = document.createElement('div');
-                    infoDisplayContainer.className = 'dropdown-content';
-                    infoDisplayContainer.innerHTML = `
-                        <p class="text-xs font-semibold mb-1">Détails des tickets :</p>
-                        <p class="text-sm">Tickets IG: <span class="font-medium">${member.tickets_ig || 'N/A'}</span></p>
-                        <p class="text-sm">Tickets Panel: <span class="font-medium">${member.tickets_panel || 'N/A'}</span></p>
-                    `;
-                    infoCell.appendChild(infoDisplayContainer);
-
-                    // Événement pour afficher les infos au clic simple
-                    infoSpan.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
-                            openDropdown.classList.remove('show');
-                        });
-                        infoDisplayContainer.classList.toggle('show');
-                    });
-
-                    // Événement pour afficher le formulaire de modification au double-clic
-                    infoSpan.addEventListener('dblclick', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // Créer et afficher le formulaire de modification
-                        const form = document.createElement('div');
-                        form.className = 'edit-info-form show';
-                        form.innerHTML = `
-                            <p class="text-md font-semibold mb-2">Modifier les tickets de ${member.discord_name}</p>
-                            <div class="mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Tickets IG</label>
-                                <input type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2" value="${member.tickets_ig}">
-                            </div>
-                            <div class="mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Tickets Panel</label>
-                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2" value="${member.tickets_panel}">
-                            </div>
-                            <button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
-                                Enregistrer
-                            </button>
-                        `;
-
-                        // Remplacer l'élément existant par le formulaire
-                        infoCell.innerHTML = '';
-                        infoCell.appendChild(form);
-
-                        // Gérer l'enregistrement
-                        form.querySelector('button').addEventListener('click', () => {
-                            const newTicketsIg = form.querySelector('input[type="number"]').value;
-                            const newTicketsPanel = form.querySelector('input[type="text"]').value;
-                            member.tickets_ig = newTicketsIg;
-                            member.tickets_panel = newTicketsPanel;
-                            saveDataToLocalStorage();
-                            renderTable(); // Re-render pour afficher les nouvelles données
-                        });
-
-                        // Fermer le formulaire si on clique en dehors
-                        document.addEventListener('click', (clickEvent) => {
-                            if (!form.contains(clickEvent.target) && clickEvent.target !== infoSpan) {
-                                renderTable();
-                            }
-                        }, { once: true });
-                    });
-
-                    // Créer la cellule pour la suppression (maintenant en dernier)
-                    const actionCell = document.createElement('td');
-                    actionCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
-                    const deleteBtn = document.createElement('button');
-                    // Ajout d'une classe pour l'effet de survol
-                    deleteBtn.className = 'text-red-500 hover:text-red-700 transition-colors';
-                    deleteBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                        </svg>
-                    `;
-                    deleteBtn.title = `Supprimer ${member.discord_name}`;
-                    deleteBtn.onclick = () => handleDelete(index);
-                    actionCell.appendChild(deleteBtn);
-
-                    // Ajouter toutes les cellules à la ligne dans le bon ordre
-                    row.appendChild(posteCell);
-                    row.appendChild(discordCell);
-                    row.appendChild(igCell);
-                    row.appendChild(panelCell);
-                    row.appendChild(infoCell);
-                    row.appendChild(actionCell);
-
-                    tableBody.appendChild(row);
                 });
+
+                listenToStaffData();
+            } catch (e) {
+                console.error("Erreur d'initialisation de Firebase:", e);
+                alert("Erreur de connexion à la base de données. Veuillez recharger la page.");
             }
-
-            // Fonction pour fermer les menus déroulants lorsqu'on clique en dehors
-            document.addEventListener('click', (e) => {
-                document.querySelectorAll('.dropdown-content.show').forEach(dropdown => {
-                    dropdown.classList.remove('show');
-                });
+        }
+        
+        // Fonction pour trier les données
+        function sortStaffData(data) {
+            return data.sort((a, b) => {
+                const orderA = posteOrder.indexOf(a.poste);
+                const orderB = posteOrder.indexOf(b.poste);
+                if (orderA !== orderB) return orderA - orderB;
+                return a.discord_name.localeCompare(b.discord_name); // Tri alphabétique si les postes sont identiques
             });
+        }
 
-            // Fonction de gestion de l'ajout
-            addForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const newMember = {
-                    poste: e.target.poste.value,
-                    discord_name: e.target.discord_name.value,
-                    discord_id: e.target.discord_id.value,
-                    implication_ig: e.target.implication_ig.value,
-                    panel_url: e.target.panel_url.value,
-                    // Les nouvelles informations sont initialisées à vide
-                    tickets_ig: '',
-                    tickets_panel: ''
-                };
-                staffData.push(newMember);
-                saveDataToLocalStorage();
-                renderTable(); // Re-render pour trier le nouveau membre
-                addForm.reset();
-            });
+        // Fonction pour extraire l'ID Steam depuis le lien du panel
+        function getSteamId(url) {
+            if (!url) return 'N/A';
+            const parts = url.split('/');
+            const steamId = parts[parts.length - 1];
+            return steamId || 'N/A';
+        }
 
-            // Fonction de gestion de la suppression
-            function handleDelete(index) {
-                // Trouver l'élément à supprimer dans le tableau non trié
-                const memberToDelete = sortStaffData(staffData)[index];
-                const originalIndex = staffData.findIndex(member => member === memberToDelete);
+        // Fonction pour copier du texte dans le presse-papiers
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('input');
+            document.body.appendChild(tempInput);
+            tempInput.value = text;
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showNotification('Copié !');
+        }
 
-                if (originalIndex !== -1) {
-                    staffData.splice(originalIndex, 1);
-                    saveDataToLocalStorage();
-                    renderTable(); // Re-render le tableau après suppression
-                }
+        // Fonction pour afficher une notification de copie
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-100');
+            }, 10);
+            setTimeout(() => {
+                notification.classList.remove('opacity-100');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 2000);
+        }
+
+        // Fonction pour afficher la modale de confirmation
+        function showConfirmationModal(docId, name) {
+            memberToDeleteId = docId;
+            confirmationText.textContent = `Êtes-vous sûr de vouloir supprimer ${name} ?`;
+            confirmationOverlay.style.display = 'flex';
+        }
+
+        // Gérer le clic sur le bouton "Confirmer" de la modale
+        confirmDeleteBtn.addEventListener('click', () => {
+            if (memberToDeleteId) {
+                deleteStaffMember(memberToDeleteId);
             }
-
-            // Gérer l'affichage du formulaire au clic du bouton
-            toggleBtn.addEventListener('click', () => {
-                formContainer.classList.toggle('open');
-                toggleIcon.classList.toggle('rotate-180');
-            });
-
-            // Rendre le tableau au chargement de la page
-            renderTable();
-
-            // Attacher les fonctions globales au window pour les rendre accessibles dans le HTML
-            window.copyToClipboard = copyToClipboard;
-            window.handleDelete = handleDelete; // Exposer la fonction handleDelete
+            confirmationOverlay.style.display = 'none';
+            memberToDeleteId = null;
         });
-    </script>
 
+        // Gérer le clic sur le bouton "Annuler" de la modale
+        cancelDeleteBtn.addEventListener('click', () => {
+            confirmationOverlay.style.display = 'none';
+            memberToDeleteId = null;
+        });
+        
+        // Écouter les modifications de la base de données en temps réel
+        function listenToStaffData() {
+            if (!db) {
+                console.error("Base de données non initialisée.");
+                return;
+            }
+            const collectionPath = `/artifacts/${appId}/public/data/staff_fa`;
+            const q = collection(db, collectionPath);
+            
+            onSnapshot(q, (snapshot) => {
+                let staffData = [];
+                snapshot.forEach((doc) => {
+                    staffData.push({ id: doc.id, ...doc.data() });
+                });
+                renderTable(staffData);
+            }, (error) => {
+                console.error("Erreur lors de l'écoute des données :", error);
+            });
+        }
+
+        // Fonction pour rendre le tableau
+        function renderTable(data) {
+            const sortedData = sortStaffData(data);
+            tableBody.innerHTML = ''; 
+
+            sortedData.forEach((member) => {
+                const row = document.createElement('tr');
+                row.className = `hover:bg-gray-50 transition-colors`;
+
+                const posteCell = document.createElement('td');
+                posteCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6';
+                const posteSelect = document.createElement('select');
+                posteSelect.className = `block w-full rounded-md border-gray-300 shadow-sm text-sm p-1 focus:outline-none color-${member.poste.replace(' ', '-')}`;
+                ['Administrateur', 'Modérateur Expert', 'Modérateur'].forEach(optionValue => {
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionValue;
+                    if (optionValue === member.poste) {
+                        option.selected = true;
+                    }
+                    posteSelect.appendChild(option);
+                });
+                posteSelect.addEventListener('change', (e) => {
+                    updateStaffMember(member.id, { poste: e.target.value });
+                });
+                posteCell.appendChild(posteSelect);
+
+                const discordCell = document.createElement('td');
+                discordCell.className = 'px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 md:px-6 relative';
+                
+                const dropdownContainer = document.createElement('div');
+                dropdownContainer.className = 'dropdown-container flex items-center';
+
+                const discordNameSpan = document.createElement('span');
+                discordNameSpan.className = 'cursor-pointer hover:underline';
+                discordNameSpan.textContent = member.discord_name;
+                dropdownContainer.appendChild(discordNameSpan);
+
+                const editIcon = document.createElement('span');
+                editIcon.className = 'ml-2 text-gray-400 cursor-pointer hover:text-blue-500';
+                editIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>`;
+                editIcon.title = 'Double-clic pour modifier';
+                dropdownContainer.appendChild(editIcon);
+
+                const dropdownContent = document.createElement('div');
+                dropdownContent.className = 'dropdown-content';
+                
+                const discordIdPara = document.createElement('p');
+                discordIdPara.className = 'text-sm text-gray-900 flex items-center justify-between mb-1';
+                discordIdPara.innerHTML = `
+                    <span><i class="fab fa-discord mr-2 text-indigo-500"></i>ID Discord:</span>
+                    <span class="flex items-center">
+                        <span class="text-xs text-gray-600 font-mono mr-2 truncate" title="${member.discord_id}">${member.discord_id}</span>
+                        <button class="copy-btn text-gray-400 hover:text-blue-500" title="Copier l'ID Discord" onclick="copyToClipboard('${member.discord_id}')">
+                            <i class="far fa-clipboard"></i>
+                        </button>
+                    </span>
+                `;
+                dropdownContent.appendChild(discordIdPara);
+                
+                const steamId = getSteamId(member.panel_url);
+                const steamIdPara = document.createElement('p');
+                steamIdPara.className = 'text-sm text-gray-900 flex items-center justify-between';
+                steamIdPara.innerHTML = `
+                    <span><i class="fab fa-steam-symbol mr-2 text-gray-600"></i>ID Steam:</span>
+                    <span class="flex items-center">
+                        <span class="text-xs text-gray-600 font-mono mr-2 truncate" title="${steamId}">${steamId}</span>
+                        <button class="copy-btn text-gray-400 hover:text-blue-500" title="Copier l'ID Steam" onclick="copyToClipboard('${steamId}')">
+                            <i class="far fa-clipboard"></i>
+                        </button>
+                    </span>
+                `;
+                dropdownContent.appendChild(steamIdPara);
+                
+                dropdownContainer.appendChild(dropdownContent);
+                discordCell.appendChild(dropdownContainer);
+                
+                discordNameSpan.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+                        if (openDropdown !== dropdownContent) {
+                            openDropdown.classList.remove('show');
+                        }
+                    });
+                    dropdownContent.classList.toggle('show');
+                });
+                
+                discordNameSpan.addEventListener('dblclick', (e) => {
+                    e.preventDefault();
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = member.discord_name;
+                    input.className = 'w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-1';
+
+                    discordNameSpan.replaceWith(input);
+                    editIcon.style.display = 'none';
+                    input.focus();
+
+                    const handleUpdate = () => {
+                        updateStaffMember(member.id, { discord_name: input.value });
+                    };
+
+                    input.addEventListener('blur', handleUpdate);
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            handleUpdate();
+                        }
+                    });
+                });
+
+                const igCell = document.createElement('td');
+                igCell.className = `px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6`;
+                const igSelect = document.createElement('select');
+                igSelect.className = `block w-full rounded-md border-gray-300 shadow-sm text-sm p-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 color-${member.implication_ig.toLowerCase().replace(' ', '-')}`;
+                const igOptions = ['Excellent', 'Bon', 'Moyen', 'Faible', 'Absent', 'Nouveau'];
+                igOptions.forEach(optionValue => {
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionValue;
+                    if (optionValue === member.implication_ig) {
+                        option.selected = true;
+                    }
+                    igSelect.appendChild(option);
+                });
+                igSelect.addEventListener('change', (e) => {
+                    updateStaffMember(member.id, { implication_ig: e.target.value });
+                });
+                igCell.appendChild(igSelect);
+                
+                const panelCell = document.createElement('td');
+                panelCell.className = 'px-3 py-4 whitespace-nowrap text-sm md:px-6';
+                if (member.panel_url) {
+                    const panelLink = document.createElement('a');
+                    panelLink.href = member.panel_url;
+                    panelLink.target = '_blank';
+                    panelLink.rel = 'noopener noreferrer';
+                    panelLink.className = 'text-blue-600 hover:text-blue-800 profile-link';
+                    panelLink.textContent = 'Lien';
+                    panelCell.appendChild(panelLink);
+                }
+
+                const infoCell = document.createElement('td');
+                infoCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 md:px-6 relative';
+                const steamId_infoCell = getSteamId(member.panel_url);
+                const infoSpan = document.createElement('span');
+                infoSpan.textContent = steamId_infoCell;
+                infoSpan.className = 'cursor-pointer hover:underline text-gray-600 font-mono';
+                infoCell.appendChild(infoSpan);
+
+                const infoDisplayContainer = document.createElement('div');
+                infoDisplayContainer.className = 'dropdown-content';
+                infoDisplayContainer.innerHTML = `
+                    <p class="text-xs font-semibold mb-1">Détails des tickets :</p>
+                    <p class="text-sm">Tickets IG: <span class="font-medium">${member.tickets_ig || 'N/A'}</span></p>
+                    <p class="text-sm">Tickets Panel: <span class="font-medium">${member.tickets_panel || 'N/A'}</span></p>
+                `;
+                infoCell.appendChild(infoDisplayContainer);
+
+                infoSpan.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.dropdown-content.show').forEach(openDropdown => {
+                        openDropdown.classList.remove('show');
+                    });
+                    infoDisplayContainer.classList.toggle('show');
+                });
+
+                infoSpan.addEventListener('dblclick', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const form = document.createElement('div');
+                    form.className = 'edit-info-form show';
+                    form.innerHTML = `
+                        <p class="text-md font-semibold mb-2">Modifier les tickets de ${member.discord_name}</p>
+                        <div class="mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Tickets IG</label>
+                            <input type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2" value="${member.tickets_ig}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Tickets Panel</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm p-2" value="${member.tickets_panel}">
+                        </div>
+                        <button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                            Enregistrer
+                        </button>
+                    `;
+                    infoCell.innerHTML = '';
+                    infoCell.appendChild(form);
+
+                    form.querySelector('button').addEventListener('click', () => {
+                        const newTicketsIg = form.querySelector('input[type="number"]').value;
+                        const newTicketsPanel = form.querySelector('input[type="text"]').value;
+                        updateStaffMember(member.id, { tickets_ig: newTicketsIg, tickets_panel: newTicketsPanel });
+                    });
+
+                    document.addEventListener('click', (clickEvent) => {
+                        if (!form.contains(clickEvent.target) && clickEvent.target !== infoSpan) {
+                            renderTable(data);
+                        }
+                    }, { once: true });
+                });
+
+                const actionCell = document.createElement('td');
+                actionCell.className = 'px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:px-6';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-500 hover:text-red-700 transition-colors';
+                deleteBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                    </svg>
+                `;
+                deleteBtn.title = `Supprimer ${member.discord_name}`;
+                deleteBtn.onclick = () => showConfirmationModal(member.id, member.discord_name);
+                actionCell.appendChild(deleteBtn);
+
+                row.appendChild(posteCell);
+                row.appendChild(discordCell);
+                row.appendChild(igCell);
+                row.appendChild(panelCell);
+                row.appendChild(infoCell);
+                row.appendChild(actionCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Ajouter un nouveau membre
+        async function addStaffMember(memberData) {
+            try {
+                const collectionPath = `/artifacts/${appId}/public/data/staff_fa`;
+                await addDoc(collection(db, collectionPath), memberData);
+                showNotification("Membre ajouté avec succès !");
+            } catch (e) {
+                console.error("Erreur d'ajout de document : ", e);
+                alert("Erreur lors de l'ajout du membre. Veuillez réessayer.");
+            }
+        }
+
+        // Mettre à jour un membre existant
+        async function updateStaffMember(docId, updatedData) {
+            try {
+                const docPath = `/artifacts/${appId}/public/data/staff_fa/${docId}`;
+                await setDoc(doc(db, docPath), updatedData, { merge: true });
+            } catch (e) {
+                console.error("Erreur de mise à jour de document : ", e);
+                alert("Erreur lors de la mise à jour. Veuillez réessayer.");
+            }
+        }
+
+        // Supprimer un membre
+        async function deleteStaffMember(docId) {
+            try {
+                const docPath = `/artifacts/${appId}/public/data/staff_fa/${docId}`;
+                await deleteDoc(doc(db, docPath));
+                showNotification("Membre supprimé avec succès !");
+            } catch (e) {
+                console.error("Erreur de suppression de document : ", e);
+                alert("Erreur lors de la suppression. Veuillez réessayer.");
+            }
+        }
+
+        addForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newMember = {
+                poste: e.target.poste.value,
+                discord_name: e.target.discord_name.value,
+                discord_id: e.target.discord_id.value,
+                implication_ig: e.target.implication_ig.value,
+                panel_url: e.target.panel_url.value,
+                tickets_ig: '',
+                tickets_panel: ''
+            };
+            addStaffMember(newMember);
+            addForm.reset();
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            formContainer.classList.toggle('open');
+            toggleIcon.classList.toggle('rotate-180');
+        });
+        
+        submitCodeBtn.addEventListener('click', () => {
+            const enteredCode = codeInput.value;
+            if (enteredCode === ACCESS_CODE) {
+                codeOverlay.style.display = 'none';
+                mainContent.style.display = 'block';
+                userIdDisplay.textContent = userId;
+            } else {
+                errorMessage.style.display = 'block';
+                codeModal.classList.add('shake');
+                setTimeout(() => codeModal.classList.remove('shake'), 500);
+            }
+        });
+
+        initializeFirebase();
+    </script>
 </body>
 </html>
